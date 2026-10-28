@@ -1,0 +1,4 @@
+fraud_type,fraud_txns,customers_hit,avg_amount_inr,total_value_inr
+account_takeover,352,65,5376.0,1892387.0
+card_testing,376,45,2028.0,762599.0
+skimming,102,29,6337.0,646339.0

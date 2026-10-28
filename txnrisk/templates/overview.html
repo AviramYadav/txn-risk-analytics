@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Overview</h1>
+<p class="lede">Last pipeline run: {{ "{:,}".format(m.volumes.staged_txns) }} transactions staged, checked against
+  {{ scorecard|length }} data-quality rules, scored by the <b>{{ m.champion.replace('_', ' ') }}</b> model on a held-out test window.
+  Synthetic data.</p>
+
+<div class="stats">
+  <div><b>{{ "{:,}".format(m.volumes.clean_txns) }}</b><span>Clean transactions</span></div>
+  <div><b>{{ m.volumes.fraud_rate_pct }}%</b><span>Fraud rate</span></div>
+  <div><b>{{ m.reconciliation.quarantined_rows }}</b><span><a href="{{ url_for('quality') }}">Rows quarantined</a></span></div>
+  <div><b>{{ "%.3f"|format(champion.pr_auc) }}</b><span>PR-AUC (test)</span></div>
+  <div><b>{{ "%.0f"|format(champion.precision * 100) }}% / {{ "%.0f"|format(champion.recall * 100) }}%</b><span>Precision / recall</span></div>
+  <div><b>{{ "%.1f"|format(champion.alerts_per_day) }}</b><span><a href="{{ url_for('alerts') }}">Alerts per day</a></span></div>
+</div>
+
+<div class="grid2">
+  <div>
+    <h2>Model comparison (test window)</h2>
+    <table>
+      <thead><tr><th>Model</th><th class="num">PR-AUC</th><th class="num">ROC-AUC</th><th class="num">Precision</th><th class="num">Recall</th><th class="num">Alerts/day</th></tr></thead>
+      <tbody>
+      {% for name, r in m.metrics.items() %}
+        <tr>
+          <td>{{ name.replace('_', ' ') }}{% if name == m.champion %} <span class="pill">champion</span>{% endif %}</td>
+          <td class="num">{{ "%.3f"|format(r.pr_auc) }}</td><td class="num">{{ "%.3f"|format(r.roc_auc) }}</td>
+          <td class="num">{{ "%.1f"|format(r.precision * 100) }}%</td><td class="num">{{ "%.1f"|format(r.recall * 100) }}%</td>
+          <td class="num">{{ "%.1f"|format(r.alerts_per_day) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p class="muted">A model that never flags anything would score {{ "%.2f"|format(m.baseline_accuracy * 100) }}% accuracy here,
+      so accuracy is not reported as a headline number.</p>
+    <div class="card"><img src="{{ url_for('report_file', name='pr_curve.png') }}" alt="Precision-recall curves for both models"></div>
+  </div>
+  <div>
+    <h2>What drives the score</h2>
+    <div class="card"><img src="{{ url_for('report_file', name='feature_importance.png') }}" alt="Permutation feature importance"></div>
+    <h2>Fraud by type</h2>
+    <table>
+      <thead><tr><th>Type</th><th class="num">Txns</th><th class="num">Customers</th><th class="num">Avg INR</th><th class="num">Total INR</th></tr></thead>
+      <tbody>
+      {% for r in by_type %}
+        <tr><td>{{ r.fraud_type.replace('_', ' ') }}</td><td class="num">{{ r.fraud_txns }}</td><td class="num">{{ r.customers_hit }}</td>
+            <td class="num">{{ "{:,.0f}".format(r.avg_amount_inr) }}</td><td class="num">{{ "{:,.0f}".format(r.total_value_inr) }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <h2>Fraud by channel</h2>
+    <table>
+      <thead><tr><th>Channel</th><th class="num">Txns</th><th class="num">Fraud</th><th class="num">Rate</th><th class="num">Value INR</th></tr></thead>
+      <tbody>
+      {% for r in by_channel %}
+        <tr><td>{{ r.channel }}</td><td class="num">{{ "{:,}".format(r.txns) }}</td><td class="num">{{ r.fraud_txns }}</td>
+            <td class="num">{{ r.fraud_rate_pct }}%</td><td class="num">{{ "{:,.0f}".format(r.fraud_value_inr) }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

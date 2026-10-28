@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Data quality · Transaction Risk Analytics{% endblock %}
+{% block content %}
+<h1>Data quality</h1>
+<p class="lede">Every staged row is tested against each rule. Failing rows are quarantined with the reason, and only clean rows reach
+  <span class="mono">fct_transactions</span>. Click a rule to see the rows it caught.</p>
+
+<div class="stats">
+  <div><b>{{ "{:,}".format(recon.staged_rows) }}</b><span>Staged rows</span></div>
+  <div><b>{{ "{:,}".format(recon.promoted_rows) }}</b><span>Promoted</span></div>
+  <div><b>{{ "{:,}".format(recon.quarantined_rows) }}</b><span>Quarantined</span></div>
+  <div><b style="color:{{ 'var(--ok)' if recon.rows_balanced and recon.amount_balanced else 'var(--fraud)' }}">{{ "Balanced" if recon.rows_balanced and recon.amount_balanced else "BREAK" }}</b>
+       <span>Rows and INR {{ "{:,.2f}".format(recon.staged_amount) }} reconciled</span></div>
+</div>
+
+<h2>Scorecard</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Rule</th><th>Dimension</th><th>Bad row if&hellip;</th><th class="num">Failed</th><th class="num">Pass rate</th><th class="num">Threshold</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for s in scorecard %}
+    <tr class="{{ 'focus' if s.rule == rule }}">
+      <td>{% if s.failed_rows %}<a href="{{ url_for('quality', rule=s.rule) }}">{{ s.rule }}</a>{% else %}{{ s.rule }}{% endif %}</td>
+      <td>{{ s.dimension.replace('_', ' ') }}</td>
+      <td class="mono muted">{{ rules[s.rule].predicate|truncate(70) }}</td>
+      <td class="num">{{ s.failed_rows }}</td>
+      <td class="num">{{ "%.4f"|format(s.pass_rate * 100) }}%</td>
+      <td class="num">{{ "%.1f"|format(s.threshold * 100) }}%</td>
+      <td><span class="pill {{ s.status }}">{{ s.status }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% if rule %}
+<h2>Quarantined by {{ rule }} (first 50 rows, as received)</h2>
+<div class="scroll">
+<table>
+  <thead><tr>{% for k in sample[0].keys() if sample %}<th>{{ k }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for r in sample %}
+    <tr>{% for v in r.values() %}<td class="mono">{{ "NULL" if v is none else v }}</td>{% endfor %}</tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

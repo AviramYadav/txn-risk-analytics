@@ -1,0 +1,4 @@
+channel,txns,fraud_txns,fraud_rate_pct,fraud_value_inr
+ECOM,95981,728,0.758,2654986.0
+ATM,22376,67,0.299,421800.0
+POS,147925,35,0.024,224539.0

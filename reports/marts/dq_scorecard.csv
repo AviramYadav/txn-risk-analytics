@@ -1,0 +1,10 @@
+rule,dimension,failed_rows,total_rows,pass_rate,threshold,status
+txn_id_unique,uniqueness,88,266810,0.99967,1.0,FAIL
+required_fields_present,completeness,0,266810,1.0,0.999,PASS
+amount_not_null,completeness,88,266810,0.99967,0.999,PASS
+amount_positive,validity,88,266810,0.99967,0.999,PASS
+channel_in_domain,validity,88,266810,0.99967,0.999,PASS
+ts_parseable,validity,0,266810,1.0,0.999,PASS
+ts_not_in_future,timeliness,88,266810,0.99967,0.999,PASS
+merchant_exists,referential_integrity,88,266810,0.99967,1.0,FAIL
+customer_exists,referential_integrity,0,266810,1.0,1.0,PASS

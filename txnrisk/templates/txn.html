@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ t.txn_id }} · Transaction Risk Analytics{% endblock %}
+{% block content %}
+<h1 class="mono">{{ t.txn_id }}</h1>
+<p class="lede">
+  {{ t.ts }} &middot; INR {{ "{:,.2f}".format(t.amount) }} &middot; {{ t.channel }} at a {{ t.category.replace('_', ' ') }} merchant ({{ t.merchant_city }}) &middot;
+  customer <a class="mono" href="{{ url_for('customer', customer_id=t.customer_id) }}">{{ t.customer_id }}</a>
+  {% if t.is_fraud %}&middot; <span class="pill fraud">{{ (t.fraud_type or 'fraud').replace('_', ' ') }}</span>{% endif %}
+</p>
+
+<div class="grid2">
+  <div>
+    <h2>Model score</h2>
+    {% if t.score is not none %}
+      <div class="stats">
+        <div><b>{{ "%.3f"|format(t.score) }}</b><span>Score</span></div>
+        <div><b>{{ "%.3f"|format(threshold) }}</b><span>Alert threshold</span></div>
+        <div><b>{{ "ALERT" if t.flagged else "no alert" }}</b><span>Decision</span></div>
+        <div><b>{{ "fraud" if t.is_fraud else "legit" }}</b><span>Actual label</span></div>
+      </div>
+    {% else %}
+      <p class="muted">Not scored: this transaction is in the training or warm-up period, not the test window.</p>
+    {% endif %}
+    <h2>Features at transaction time</h2>
+    <table>
+      <tbody>
+      {% for k in ["amount_to_avg_ratio", "txn_count_1h", "txn_count_24h", "amount_sum_24h", "secs_since_prev",
+                   "is_new_device", "is_out_of_city", "is_night", "hour", "hist_txn_count"] %}
+        <tr><td>{{ k.replace('_', ' ') }}</td><td class="num mono">{{ "{:,.2f}".format(feats[k]) if feats[k] is float else feats[k] }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <h2>Customer</h2>
+    <dl class="facts card">
+      <dt>Segment</dt><dd>{{ t.segment }}</dd>
+      <dt>Home city</dt><dd>{{ t.home_city }}</dd>
+      <dt>Device</dt><dd class="mono">{{ t.device_id or "card present" }}</dd>
+      <dt>Merchant</dt><dd class="mono">{{ t.merchant_id }} <span class="pill {{ t.risk_tier }}">{{ t.risk_tier }} risk</span></dd>
+    </dl>
+  </div>
+</div>
+
+<h2>Customer activity from 24h before to 6h after</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Transaction</th><th>Time</th><th class="num">Amount INR</th><th>Channel</th><th>Category</th><th>City</th><th>Device</th><th class="num">Score</th><th>Label</th></tr></thead>
+  <tbody>
+  {% for r in around %}
+    <tr class="{{ 'fraud' if r.is_fraud }} {{ 'focus' if r.txn_id == t.txn_id }}">
+      <td class="mono"><a href="{{ url_for('txn', txn_id=r.txn_id) }}">{{ r.txn_id }}</a></td>
+      <td class="mono">{{ r.ts }}</td><td class="num">{{ "{:,.2f}".format(r.amount) }}</td><td>{{ r.channel }}</td>
+      <td>{{ r.category.replace('_', ' ') }}</td><td>{{ r.city }}</td><td class="mono">{{ r.device_id or "" }}</td>
+      <td class="num mono">{{ "%.3f"|format(r.score) if r.score is not none else "" }}</td>
+      <td>{% if r.is_fraud %}<span class="pill fraud">fraud</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

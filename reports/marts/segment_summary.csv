@@ -1,0 +1,4 @@
+segment,customers,txns,avg_ticket_inr,fraud_rate_pct
+premium,462,35264,5067.0,0.147
+affluent,1492,87401,3260.0,0.288
+mass,3046,143617,2328.0,0.366

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}SQL console · Transaction Risk Analytics{% endblock %}
+{% block content %}
+<h1>SQL console</h1>
+<p class="lede">Read-only access to the SQLite warehouse. One SELECT or WITH statement at a time, up to 500 rows, 5-second limit.</p>
+
+<div class="sql-layout">
+  <div>
+    <form method="post">
+      <textarea class="sql" name="sql" spellcheck="false">{{ sql }}</textarea>
+      <p><button class="btn">Run query</button> <span class="muted">Ctrl/Cmd + Enter</span></p>
+    </form>
+    {% if error %}<div class="err">{{ error }}</div>{% endif %}
+    {% if cols %}
+      <p class="muted">{{ rows|length }} row(s){% if truncated %}, truncated at 500{% endif %}</p>
+      <div class="scroll">
+      <table>
+        <thead><tr>{% for c in cols %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+        <tbody>
+        {% for r in rows %}
+          <tr>{% for v in r %}<td class="{{ 'num' if v is number else '' }} mono">{{ "NULL" if v is none else v }}</td>{% endfor %}</tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    {% endif %}
+  </div>
+  <div>
+    <h2 style="margin-top:0">Saved queries</h2>
+    <ul style="margin:0;padding-left:16px">
+      {% for name in examples %}<li><a href="{{ url_for('sql_console', example=name) }}">{{ name.replace('_', ' ') }}</a></li>{% endfor %}
+    </ul>
+    <h2>Tables</h2>
+    <ul style="margin:0;padding-left:16px" class="mono">
+      {% for t in tables %}<li>{{ t }}</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+<script>
+  document.querySelector("textarea.sql").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) this.form.submit();
+  });
+</script>
+{% endblock %}

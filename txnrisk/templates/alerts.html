@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Alert queue · Transaction Risk Analytics{% endblock %}
+{% block content %}
+<h1>Alert queue</h1>
+<p class="lede">Test window {{ window[0][:10] }} to {{ window[1][:10] }} ({{ "{:,}".format(window[2]) }} transactions the model never saw in training).
+  A transaction is alerted when its score is at least {{ "%.3f"|format(threshold) }}, the threshold tuned on the validation window.</p>
+
+<div class="tabs">
+  <a href="{{ url_for('alerts') }}" class="{{ 'on' if not outcome }}">All alerts <span>{{ counts.caught + counts.false_alarm }}</span></a>
+  <a href="{{ url_for('alerts', outcome='caught') }}" class="{{ 'on' if outcome == 'caught' }}">Confirmed fraud <span>{{ counts.caught }}</span></a>
+  <a href="{{ url_for('alerts', outcome='false_alarm') }}" class="{{ 'on' if outcome == 'false_alarm' }}">False alarms <span>{{ counts.false_alarm }}</span></a>
+  <a href="{{ url_for('alerts', outcome='missed') }}" class="{{ 'on' if outcome == 'missed' }}">Missed fraud <span>{{ counts.missed }}</span></a>
+</div>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Transaction</th><th>Time</th><th>Customer</th><th class="num">Amount INR</th><th>Channel</th><th>Merchant</th><th>Score</th><th>Label</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr class="{{ 'fraud' if r.is_fraud }}">
+      <td class="mono"><a href="{{ url_for('txn', txn_id=r.txn_id) }}">{{ r.txn_id }}</a></td>
+      <td class="mono">{{ r.ts }}</td>
+      <td class="mono"><a href="{{ url_for('customer', customer_id=r.customer_id) }}">{{ r.customer_id }}</a></td>
+      <td class="num">{{ "{:,.2f}".format(r.amount) }}</td>
+      <td>{{ r.channel }}</td>
+      <td>{{ r.category.replace('_', ' ') }} <span class="pill {{ r.risk_tier }}">{{ r.risk_tier }}</span></td>
+      <td><span class="score"><i><b style="width:{{ (r.score * 100)|round|int }}%"></b></i><span class="mono">{{ "%.3f"|format(r.score) }}</span></span></td>
+      <td>{% if r.is_fraud %}<span class="pill fraud">{{ (r.fraud_type or 'fraud').replace('_', ' ') }}</span>{% else %}<span class="muted">legit</span>{% endif %}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">Nothing in this view.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

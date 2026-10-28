@@ -1,0 +1,11 @@
+category,risk_tier,txns,fraud_txns,fraud_rate_pct,fraud_value_inr
+digital_goods,high,30176,548,1.816,1210444.0
+gift_cards,high,6312,56,0.887,345204.0
+electronics,high,15910,125,0.786,1108087.0
+atm_cash,medium,22376,67,0.299,421800.0
+fuel,low,29552,9,0.03,65378.0
+grocery,low,57707,12,0.021,68507.0
+restaurants,low,44518,9,0.02,58753.0
+apparel,medium,27081,4,0.015,23153.0
+travel,medium,10809,0,0.0,
+utilities,low,21841,0,0.0,

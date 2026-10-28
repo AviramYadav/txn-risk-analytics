@@ -1,0 +1,58 @@
+{
+  "volumes": {
+    "customers": 5000,
+    "merchants": 800,
+    "staged_txns": 266810,
+    "clean_txns": 266282,
+    "fraud_txns": 830,
+    "fraud_rate_pct": 0.312
+  },
+  "reconciliation": {
+    "staged_rows": 266810,
+    "promoted_rows": 266282,
+    "quarantined_rows": 528,
+    "rows_balanced": true,
+    "staged_amount": 798585511.41,
+    "promoted_amount": 798012845.21,
+    "quarantined_amount": 572666.2,
+    "amount_balanced": true
+  },
+  "dq_failed_rules": [
+    "txn_id_unique",
+    "merchant_exists"
+  ],
+  "champion": "gradient_boosting",
+  "threshold": 0.32445731682692625,
+  "metrics": {
+    "logistic_regression": {
+      "pr_auc": 0.5250343346056092,
+      "roc_auc": 0.9966259116786312,
+      "precision": 0.425414364640884,
+      "recall": 0.6311475409836066,
+      "f1": 0.5082508250825083,
+      "accuracy": 0.9959882069439022,
+      "tp": 154,
+      "fp": 208,
+      "fn": 90,
+      "tn": 73829,
+      "alerts_per_day": 14.48,
+      "fraud_value_caught_pct": 60.20586541218629
+    },
+    "gradient_boosting": {
+      "pr_auc": 0.7115010828110314,
+      "roc_auc": 0.99775405828322,
+      "precision": 0.6137931034482759,
+      "recall": 0.7295081967213115,
+      "f1": 0.6666666666666666,
+      "accuracy": 0.9976036940805859,
+      "tp": 178,
+      "fp": 112,
+      "fn": 66,
+      "tn": 73925,
+      "alerts_per_day": 11.6,
+      "fraud_value_caught_pct": 62.6593966261401
+    }
+  },
+  "baseline_accuracy": 0.9967151761554098,
+  "runtime_seconds": 9.8
+}

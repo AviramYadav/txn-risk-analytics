@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ c.customer_id }} · Transaction Risk Analytics{% endblock %}
+{% block content %}
+<h1 class="mono">{{ c.customer_id }}</h1>
+<p class="lede">{{ c.segment }} customer from {{ c.home_city }} &middot; since {{ c.signup_date }} &middot; credit limit INR {{ "{:,.0f}".format(c.credit_limit) }}</p>
+<div class="stats">
+  <div><b>{{ stats.n }}</b><span>Transactions</span></div>
+  <div><b>{{ "{:,.0f}".format(stats.spend or 0) }}</b><span>Total spend INR</span></div>
+  <div><b>{{ "{:,.0f}".format(stats.avg_ticket or 0) }}</b><span>Average ticket INR</span></div>
+  <div><b style="{{ 'color:var(--fraud)' if stats.frauds }}">{{ stats.frauds or 0 }}</b><span>Fraud transactions</span></div>
+</div>
+<h2>Latest 300 transactions</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Transaction</th><th>Time</th><th class="num">Amount INR</th><th>Channel</th><th>Category</th><th>City</th><th>Device</th><th class="num">Score</th><th>Label</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr class="{{ 'fraud' if r.is_fraud }}">
+      <td class="mono"><a href="{{ url_for('txn', txn_id=r.txn_id) }}">{{ r.txn_id }}</a></td>
+      <td class="mono">{{ r.ts }}</td><td class="num">{{ "{:,.2f}".format(r.amount) }}</td><td>{{ r.channel }}</td>
+      <td>{{ r.category.replace('_', ' ') }}</td><td>{{ r.city }}</td><td class="mono">{{ r.device_id or "" }}</td>
+      <td class="num mono">{{ "%.3f"|format(r.score) if r.score is not none else "" }}</td>
+      <td>{% if r.is_fraud %}<span class="pill fraud">{{ (r.fraud_type or 'fraud').replace('_', ' ') }}</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

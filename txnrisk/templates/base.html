@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Transaction Risk Analytics{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <div class="in">
+    <div class="app">txn<span>risk</span> analytics</div>
+    <nav>
+      {% set ep = request.endpoint %}
+      <a href="{{ url_for('overview') }}" class="{{ 'on' if ep == 'overview' }}">Overview</a>
+      <a href="{{ url_for('alerts') }}" class="{{ 'on' if ep in ('alerts', 'txn', 'customer') }}">Alert queue</a>
+      <a href="{{ url_for('quality') }}" class="{{ 'on' if ep == 'quality' }}">Data quality</a>
+      <a href="{{ url_for('sql_console') }}" class="{{ 'on' if ep == 'sql_console' }}">SQL console</a>
+    </nav>
+  </div>
+</header>
+<main>
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>
